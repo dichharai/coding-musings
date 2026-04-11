@@ -1,26 +1,30 @@
-import requests
-from bs4 import BeautifulSoup
 import re
+
+import requests
+from requests import Response
+from bs4 import BeautifulSoup
+from bs4.element import ResultSet
+
 
 
 def decode_message(url: str) -> any:
-    response = requests.get(url)
+    response: Response = requests.get(url)
     response.encoding = 'utf-8'
 
-    soup = BeautifulSoup(response.text, "html.parser")
-    rows = soup.find_all('tr')
-    print(soup.text[:500])
+    soup: BeautifulSoup = BeautifulSoup(response.text, "html.parser")
+    rows: ResultSet = soup.find_all('tr')
+    # print(soup.text[:500])
 
     # print(f"Found {len(rows)} rows.\n") 
     # print(f"1st row: {rows[0]}")
 
-    clean_lines = []
+    clean_lines: list[str] = []
     for _, row in enumerate(rows[1:]):  # skipping header
         text = row.get_text()
         parts = re.split(r'(\D+)', text)
         clean_lines.append(parts)      
 
-    positions = []
+    positions: tuple[str, int, int] = []
     i = 0
 
     while i < len(clean_lines):
@@ -36,12 +40,12 @@ def decode_message(url: str) -> any:
         return
     
     # print(positions)
-    max_x = max(p[1] for p in positions)
-    max_y = max(p[2] for p in positions)
+    max_x: int = max(p[1] for p in positions)
+    max_y: int = max(p[2] for p in positions)
     # print(max_x, max_y)
 
     # empty string for grid without character
-    grid = [[' ' for _ in range(max_x+1)] for _ in range(max_y+1)]
+    grid: list[list[str]] = [[' ' for _ in range(max_x+1)] for _ in range(max_y+1)]
 
     for char, x, y in positions:
         grid[max_y-y][x] = char
